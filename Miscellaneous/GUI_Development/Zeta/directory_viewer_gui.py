@@ -6,7 +6,7 @@ from PyQt6.QtGui import QIcon, QPixmap, QAction, QFileSystemModel
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QGridLayout,
     QMenuBar, QTreeView, QFileDialog,
-    QComboBox, QLabel, QHBoxLayout, QVBoxLayout, QPushButton, QHeaderView, QGroupBox, QFormLayout
+    QComboBox, QLabel, QHBoxLayout, QVBoxLayout, QPushButton, QHeaderView, QGroupBox, QFormLayout, QSplitter
 )
 from directory_viewer_logic import DirectoryViewerLogic
 
@@ -20,7 +20,7 @@ class DirectoryViewerGUI(QMainWindow):
 
     def init_ui(self):
         self.setWindowTitle('Video File Metadata Viewer')
-        self.setMinimumSize(1250, 500)
+        self.setMinimumSize(1250, 750)
 
     def setup_main_window(self):
         self.setup_menu_bar()
@@ -40,23 +40,24 @@ class DirectoryViewerGUI(QMainWindow):
 
         combo_layout = QHBoxLayout()
         combo_layout.addWidget(dir_label)
-        combo_layout.addWidget(self.dir_combo)
+        combo_layout.addWidget(self.dir_combo,Qt.AlignmentFlag.AlignCenter)
         combo_layout.addWidget(dir_button)
 
+        splitter = QSplitter(Qt.Orientation.Horizontal)
+
+
         self.treeview = QTreeView()
-        self.treeview.setMinimumWidth(500)
+        self.treeview.setMinimumWidth(300)
         self.model = QFileSystemModel()
         self.treeview.setModel(self.model)
-        self.treeview.setColumnHidden(1, True)
-        self.treeview.setColumnHidden(3, True)
+
+        # Hide columns 1 and 3
+        for i in range(self.model.columnCount()):
+            if i not in [0]:
+                self.treeview.hideColumn(i)
 
         self.treeview.selectionModel().selectionChanged.connect(self.on_selection_changed)
-
-        header = self.treeview.header()
-        for i in range(header.count()):
-            header.setSectionResizeMode(i, QHeaderView.ResizeMode.Interactive)
-            header.setMinimumSectionSize(250)
-            header.resizeSection(i, 250)
+        splitter.addWidget(self.treeview)
 
         # File Metadata
         self.f_groupbox = QGroupBox("File Metadata")
@@ -114,17 +115,23 @@ class DirectoryViewerGUI(QMainWindow):
         self.a_groupbox.setLayout(self.aQbox_layout)
         self.setup_directory_metadata()
 
-        metadata_layout = QVBoxLayout()
+        # Create a widget for metadata and add it to the splitter
+        metadata_widget = QWidget()
+        metadata_layout = QVBoxLayout(metadata_widget)
         metadata_layout.addWidget(self.f_groupbox)
         metadata_layout.addWidget(self.v_groupbox)
         metadata_layout.addWidget(self.a_groupbox)
         metadata_layout.addWidget(self.dir_groupbox)
         metadata_layout.addStretch()
+        metadata_widget.setMinimumWidth(350)  # Set a minimum width for metadata
+        splitter.addWidget(metadata_widget)
 
-        main_layout = QGridLayout()
-        main_layout.addLayout(combo_layout, 0, 0, 1, 3)
-        main_layout.addWidget(self.treeview, 1, 0, 3, 3)
-        main_layout.addLayout(metadata_layout, 1, 3, 3, 1)
+        # Set initial sizes for splitter
+        splitter.setSizes([550, 450])  # Adjust these values as needed
+
+        main_layout = QVBoxLayout()
+        main_layout.addLayout(combo_layout)
+        main_layout.addWidget(splitter)
 
         wid = QWidget()
         wid.setLayout(main_layout)
@@ -228,8 +235,6 @@ class DirectoryViewerGUI(QMainWindow):
         if ext.lower() in ['.mkv', '.avi', '.mp4', '.mov', '.flv']:
             metadata = self.logic.get_video_metadata(file_path)
             if metadata:
-                for k, v in metadata.items():
-                    print(k, v)
                 # Update file metadata
                 self.file_labels['Name'].setText(metadata['filename'])
                 self.file_labels['Size'].setText(metadata['size'])
