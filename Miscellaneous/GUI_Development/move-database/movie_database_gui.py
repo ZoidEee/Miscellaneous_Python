@@ -1,14 +1,15 @@
-# directory_viewer_gui.py
-import sys
+# movie_database_gui.py
 import os
+import sys
+
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QIcon, QPixmap, QAction, QFileSystemModel
 from PyQt6.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QGridLayout,
-    QMenuBar, QTreeView, QFileDialog,
-    QComboBox, QLabel, QHBoxLayout, QVBoxLayout, QPushButton, QHeaderView, QGroupBox, QFormLayout, QSplitter
+    QApplication, QMainWindow, QWidget, QMenuBar, QTreeView, QFileDialog,
+    QComboBox, QLabel, QHBoxLayout, QVBoxLayout, QPushButton, QGroupBox, QSplitter
 )
-from directory_viewer_logic import DirectoryViewerLogic
+
+from movie_database_logic import DirectoryViewerLogic
 
 
 class DirectoryViewerGUI(QMainWindow):
@@ -115,7 +116,7 @@ class DirectoryViewerGUI(QMainWindow):
         self.a_groupbox.setLayout(self.aQbox_layout)
         self.setup_directory_metadata()
 
-        # Create a widget for metadata and add it to the splitter
+        # Widget for metadata and add it to the splitter
         metadata_widget = QWidget()
         metadata_layout = QVBoxLayout(metadata_widget)
         metadata_layout.addWidget(self.f_groupbox)

@@ -1,4 +1,4 @@
-# directory_viewer_logic.py
+# movie_database_logic.py
 
 import os
 import time
