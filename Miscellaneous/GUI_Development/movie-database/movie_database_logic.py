@@ -57,6 +57,9 @@ class DirectoryViewerLogic:
             video_track = next((track for track in media_info.tracks if track.track_type == "Video"), None)
             audio_track = next((track for track in media_info.tracks if track.track_type == "Audio"), None)
 
+
+
+
             metadata = {
                 'filename': os.path.basename(file_path),
                 'size': self.format_size(os.path.getsize(file_path)),
@@ -71,25 +74,29 @@ class DirectoryViewerLogic:
             if video_track:
                 metadata.update({
                     'video_format': video_track.format or video_track.codec,
-                    'video_profile': video_track.codec_profile,
+                    'video_profile': video_track.codec_id,
                     'width': video_track.width,
                     'height': video_track.height,
-                    'fps': float(video_track.frame_rate) if video_track.frame_rate else None,
+                    'fps': float(video_track.frame_rate),
                     'bit_depth': video_track.bit_depth,
-                    'pixel_format': video_track.pixel_format,
                     'video_bitrate': video_track.bit_rate,
                     'aspect_ratio': video_track.display_aspect_ratio,
                 })
 
             if audio_track:
                 metadata.update({
-                    'audio_format': audio_track.format or audio_track.codec,
-                    'audio_profile': audio_track.format_profile,
+                    'audio_format': audio_track.format,
+                    'audio_profile': audio_track.codec_id,
                     'channels': audio_track.channel_s,
                     'sample_rate': audio_track.sampling_rate,
-                    'bit_depth': audio_track.bit_depth,
                     'audio_bitrate': audio_track.bit_rate,
                 })
+                if metadata['channels'] == 2:
+                    pass
+                elif metadata['channels'] == 6:
+                    metadata.update({'channels': '5.1'})
+                elif metadata['channels'] == 8:
+                    metadata.update({'channels': '7.1'})
 
             return metadata
         except Exception as e:
@@ -117,7 +124,7 @@ class DirectoryViewerLogic:
         else:
             return f"{minutes:02d}:{seconds:02d}"
 
-    def format_aspect_ratio(self, aspect_ratio):
+'''    def format_aspect_ratio(self, aspect_ratio):
         if aspect_ratio is None:
             return "N/A"
         try:
@@ -125,3 +132,4 @@ class DirectoryViewerLogic:
             return f"{fraction.numerator}:{fraction.denominator}"
         except (ValueError, ZeroDivisionError):
             return aspect_ratio  # Return the original value if conversion fails
+'''

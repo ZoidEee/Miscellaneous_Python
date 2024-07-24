@@ -82,7 +82,7 @@ class DirectoryViewerGUI(QMainWindow):
         self.v_groupbox = QGroupBox("Video Metadata")
         self.vQbox_layout = QVBoxLayout()
 
-        video_fields = ['Format', 'Profile', 'Resolution', 'Aspect Ratio', 'FPS', 'Bit Depth', 'Pixel Format',
+        video_fields = ['Format', 'Profile', 'Resolution', 'Aspect Ratio', 'FPS', 'Bit Depth',
                         'Bitrate']
         self.video_labels = {}
 
@@ -101,7 +101,7 @@ class DirectoryViewerGUI(QMainWindow):
         self.a_groupbox = QGroupBox("Audio Metadata")
         self.aQbox_layout = QVBoxLayout()
 
-        audio_fields = ['Format', 'Profile', 'Audio Channels', 'Sample Rate', 'Bit Depth', 'Bitrate']
+        audio_fields = ['Format', 'Profile', 'Audio Channels', 'Sample Rate', 'Bitrate']
         self.audio_labels = {}
 
         for field in audio_fields:
@@ -250,13 +250,10 @@ class DirectoryViewerGUI(QMainWindow):
                     self.video_labels['Format'].setText(metadata['video_format'])
                     self.video_labels['Profile'].setText(metadata.get('video_profile', 'N/A'))
                     self.video_labels['Resolution'].setText(f"{metadata['width']}x{metadata['height']}")
-                    self.video_labels['Aspect Ratio'].setText(
-                        self.logic.format_aspect_ratio(metadata['aspect_ratio']) if metadata.get(
-                            'aspect_ratio') else 'N/A')
+                    self.video_labels['Aspect Ratio'].setText(f"{metadata['aspect_ratio']}")
                     self.video_labels['FPS'].setText(f"{metadata['fps']:.2f}" if metadata.get('fps') else 'N/A')
                     self.video_labels['Bit Depth'].setText(
                         str(metadata['bit_depth']) if metadata.get('bit_depth') else 'N/A')
-                    self.video_labels['Pixel Format'].setText(metadata.get('pixel_format', 'N/A'))
                     self.video_labels['Bitrate'].setText(
                         self.logic.format_bitrate(metadata['video_bitrate']) if metadata.get(
                             'video_bitrate') else 'N/A')
@@ -269,8 +266,6 @@ class DirectoryViewerGUI(QMainWindow):
                     self.audio_labels['Profile'].setText(metadata.get('audio_profile', 'N/A'))
                     self.audio_labels['Audio Channels'].setText(str(metadata['channels']))
                     self.audio_labels['Sample Rate'].setText(f"{metadata['sample_rate']} Hz")
-                    self.audio_labels['Bit Depth'].setText(
-                        str(metadata['bit_depth']) if metadata.get('bit_depth') else 'N/A')
                     self.audio_labels['Bitrate'].setText(
                         self.logic.format_bitrate(metadata['audio_bitrate']) if metadata.get(
                             'audio_bitrate') else 'N/A')
