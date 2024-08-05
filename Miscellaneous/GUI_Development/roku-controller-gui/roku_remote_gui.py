@@ -2,7 +2,7 @@ import sys
 from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QGridLayout,
-    QMenuBar, QLabel, QComboBox, QPushButton, QVBoxLayout, QTextEdit
+    QMenuBar, QLabel, QComboBox, QPushButton, QVBoxLayout, QTextEdit, QLineEdit
 )
 from PyQt6.QtCore import QThread, pyqtSignal
 from roku_remote_logic import RokuController
@@ -22,79 +22,69 @@ class RokuControllerGUI(QMainWindow):
         self.current_device = None
         self.initialize_ui()
         self.setup_main_window()
+        self.start_scan()
 
     def initialize_ui(self):
         self.setWindowTitle('Roku Controller')
-        self.setFixedSize(400, 600)
+        self.setFixedSize(400, 650)  # Increased height to accommodate new buttons
 
     def setup_main_window(self):
         self.create_actions()
         self.setup_menu_bar()
         main_layout = QVBoxLayout()
-
         device_layout = QGridLayout()
-        device_label = QLabel("Select Roku Device:")
+
         self.device_combo = QComboBox()
+        self.device_combo.setPlaceholderText("Select Roku Device")
         self.scan_button = QPushButton("Scan for Devices")
         self.scan_button.clicked.connect(self.start_scan)
-        device_layout.addWidget(device_label, 0, 0)
-        device_layout.addWidget(self.device_combo, 0, 1)
-        device_layout.addWidget(self.scan_button, 1, 0, 1, 2)
+
+        device_layout.addWidget(self.device_combo, 0, 1, 1, 1)
+        device_layout.addWidget(self.scan_button, 0, 2, 1, 1)
         main_layout.addLayout(device_layout)
 
+        # Create a grid layout for the buttons
         button_layout = QGridLayout()
-        self.btn_power = QPushButton("Power")
-        self.btn_home = QPushButton("Home")
-        self.btn_up = QPushButton("Up")
-        self.btn_left = QPushButton("Left")
-        self.btn_ok = QPushButton("OK")
-        self.btn_right = QPushButton("Right")
-        self.btn_back = QPushButton("Back")
-        self.btn_down = QPushButton("Down")
-        self.btn_volume_up = QPushButton("Vol+")
-        self.btn_volume_down = QPushButton("Vol-")
-        self.btn_mute = QPushButton("Mute")
-        self.btn_play_pause = QPushButton("Play/Pause")
-        self.btn_youtube = QPushButton("YouTube")
-        self.btn_disney = QPushButton("Disney+")
-        self.btn_netflix = QPushButton("Netflix")
-        self.btn_list_apps = QPushButton("List Apps")
 
-        self.btn_power.clicked.connect(self.power_pressed)
-        self.btn_home.clicked.connect(self.home_pressed)
-        self.btn_up.clicked.connect(self.up_pressed)
-        self.btn_left.clicked.connect(self.left_pressed)
-        self.btn_ok.clicked.connect(self.ok_pressed)
-        self.btn_right.clicked.connect(self.right_pressed)
-        self.btn_back.clicked.connect(self.back_pressed)
-        self.btn_down.clicked.connect(self.down_pressed)
-        self.btn_volume_up.clicked.connect(self.volume_up_pressed)
-        self.btn_volume_down.clicked.connect(self.volume_down_pressed)
-        self.btn_mute.clicked.connect(self.mute_pressed)
-        self.btn_play_pause.clicked.connect(self.play_pause_pressed)
-        self.btn_youtube.clicked.connect(self.launch_youtube)
-        self.btn_disney.clicked.connect(self.launch_disney)
-        self.btn_netflix.clicked.connect(self.launch_netflix)
-        self.btn_list_apps.clicked.connect(self.list_apps)
+        # Define a list of tuples, each containing a button label and its corresponding method
+        buttons = [
+            ("Power", self.power_pressed),
+            ("Up", self.up_pressed),
+            ("Home", self.home_pressed),
+            ("Left", self.left_pressed),
+            ("OK", self.ok_pressed),
+            ("Right", self.right_pressed),
+            ("Back", self.back_pressed),
+            ("Down", self.down_pressed),
+            ("Mute", self.mute_pressed),
+            ("Vol +", self.volume_up_pressed),
+            ("Vol -", self.volume_down_pressed),
+            ("Play/Pause", self.play_pause_pressed),
+            ("YouTube", self.launch_youtube),
+            ("Disney+", self.launch_disney),
+            ("Netflix", self.launch_netflix),
+        ]
 
-        button_layout.addWidget(self.btn_home, 1, 0)
-        button_layout.addWidget(self.btn_up, 1, 1)
-        button_layout.addWidget(self.btn_back, 1, 2)
-        button_layout.addWidget(self.btn_left, 2, 0)
-        button_layout.addWidget(self.btn_ok, 2, 1)
-        button_layout.addWidget(self.btn_right, 2, 2)
-        button_layout.addWidget(self.btn_down, 3, 1)
-        button_layout.addWidget(self.btn_play_pause, 3, 2)
-        button_layout.addWidget(self.btn_volume_up, 3, 0)
-        button_layout.addWidget(self.btn_volume_down, 4, 0)
-        button_layout.addWidget(self.btn_mute, 4, 2)
-        button_layout.addWidget(self.btn_power, 4, 1)
-        button_layout.addWidget(self.btn_youtube, 5, 0)
-        button_layout.addWidget(self.btn_netflix, 5, 1)
-        button_layout.addWidget(self.btn_disney, 5, 2)
-        button_layout.addWidget(self.btn_list_apps, 6, 1)
+        # Generate a list of grid positions for a 8x3 grid
+        positions = [(i, j) for i in range(8) for j in range(3)]
+
+        # Iterate over the positions and buttons simultaneously
+        for position, (name, method) in zip(positions, buttons):
+            # Create a button with the given name
+            button = QPushButton(name)
+            # Connect the button's click event to its corresponding method
+            button.clicked.connect(method)
+            # Add the button to the grid layout at the specified position
+            # The * operator unpacks the position tuple into separate arguments
+            button_layout.addWidget(button, *position)
+
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("Enter search query and press Enter")
+        self.search_input.returnPressed.connect(self.process_search)
+
+        button_layout.addWidget(self.search_input, 8, 0, 1, 3)
+
         main_layout.addLayout(button_layout)
-
         self.display_window = QTextEdit()
         self.display_window.setReadOnly(True)
         main_layout.addWidget(self.display_window)
@@ -143,25 +133,29 @@ class RokuControllerGUI(QMainWindow):
             return self.roku_controller.devices[self.device_combo.currentIndex()]
         return None
 
-    def send_command(self, command, is_launch=False):
+    def send_command(self, command, is_launch=False, ):
         device = self.get_current_device()
         if device:
             self.display_window.append(f"Sending command: {command}")
             if is_launch:
                 response = self.roku_controller._send_command(device['ip'], f"launch/{command}")
+            elif command.startswith("Lit_"):
+                search_query = command[4:]  # Remove "Lit_" prefix
+                response = self.roku_controller._send_command(device['ip'], f"search/browse?keyword={search_query}")
             else:
                 response = self.roku_controller._send_command(device['ip'], f"keypress/{command}")
             self.display_window.append(f"Response: {response}")
         else:
             self.display_window.append("No device selected")
-    def list_apps(self):
-        device = self.get_current_device()
-        if device:
-            self.display_window.append("Listing installed apps...")
-            response = self.roku_controller.list_apps(device['ip'])
-            self.display_window.append(response)
+
+
+    def process_search(self):
+        query = self.search_input.text()
+        if query:
+            self.send_command(f"Lit_{query}")
+            self.search_input.clear()
         else:
-            self.display_window.append("No device selected")
+            self.display_window.append("Please enter a search query")
 
     def power_pressed(self):
         self.send_command("Power")
