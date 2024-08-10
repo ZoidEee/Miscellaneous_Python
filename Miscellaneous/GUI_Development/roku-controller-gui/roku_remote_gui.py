@@ -63,6 +63,7 @@ class RokuControllerGUI(QMainWindow):
             ("YouTube", self.launch_youtube),
             ("Disney+", self.launch_disney),
             ("Netflix", self.launch_netflix),
+            ("List Apps", self.list_apps)
         ]
 
         # Generate a list of grid positions for a 8x3 grid
@@ -148,7 +149,14 @@ class RokuControllerGUI(QMainWindow):
         else:
             self.display_window.append("No device selected")
 
-
+    def list_apps(self):
+        device = self.get_current_device()
+        if device:
+            self.display_window.append("Listing installed apps...")
+            response = self.roku_controller.list_apps(device['ip'])
+            self.display_window.append(response)
+        else:
+            self.display_window.append("No device selected")
     def process_search(self):
         query = self.search_input.text()
         if query:
